@@ -1,7 +1,6 @@
 package com.shamstabrez16.orderservice.model;
 
 import lombok.*;
-import org.springframework.data.jpa.domain.AbstractAuditable;
 
 import javax.persistence.*;
 import java.util.Date;
