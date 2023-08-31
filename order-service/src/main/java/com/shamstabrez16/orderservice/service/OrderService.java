@@ -1,31 +1,42 @@
 package com.shamstabrez16.orderservice.service;
 
+import com.shamstabrez16.orderservice.dto.InventoryResponse;
 import com.shamstabrez16.orderservice.dto.OrderLineItemsDto;
 import com.shamstabrez16.orderservice.dto.OrderRequest;
 import com.shamstabrez16.orderservice.dto.OrderResponse;
 import com.shamstabrez16.orderservice.model.Order;
 import com.shamstabrez16.orderservice.model.OrderLineItems;
 import com.shamstabrez16.orderservice.repository.OrderRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class OrderService {
-    @Autowired
+
     private final OrderRepository orderRepository;
 
+    private final WebClient webClient;
+    @Autowired
+    public OrderService(OrderRepository orderRepository,WebClient webClient) {
+        this.orderRepository = orderRepository;
+        this.webClient = webClient;
+    }
     @Transactional
-    public void  createOrder(OrderRequest orderRequest) {
+    public void  createOrder(@NotNull OrderRequest orderRequest) {
 
+
+        System.out.println("createOrder");
         Order order = Order.builder()
                 .id(orderRequest.getId())
                 .order_date(orderRequest.getOrder_date())
@@ -34,7 +45,30 @@ public class OrderService {
                 .orderLineItems(orderRequest.getOrderLineItemsDtoList().stream().map(this::mapOrderLineItemsDtoToOrderLineItems).collect(Collectors.toList()))
                 .total_amount(orderRequest.getTotal_amount())
                 .build();
-         orderRepository.save(order);
+        System.out.println("createOrder - built");
+       List<String> skuCodes = order.getOrderLineItems()
+               .stream()
+               .map(OrderLineItems::getSkuCode)
+               .toList();
+       skuCodes.forEach(System.out::println);
+        InventoryResponse[] inventoryResponses= webClient.get()
+                .uri("http://localhost:8083/api/inventory",
+                        uriBuilder -> uriBuilder.queryParam("skuCode",skuCodes).build())
+                .retrieve()
+                .bodyToMono(InventoryResponse[].class)
+                .block();
+        boolean AllProductsInStock = false;
+        if(inventoryResponses!=null){
+            AllProductsInStock =  Arrays.stream(inventoryResponses).allMatch(InventoryResponse::isInStock);    
+        }
+
+        if(AllProductsInStock){
+            orderRepository.save(order);
+        }
+        else {
+            throw  new IllegalArgumentException("Product not in stock, Please try again later");
+        }
+
          log.info("Order by "+order.getCustomer_name()+" is saved!");
     }
     public List<OrderResponse> getAllOrders(){
