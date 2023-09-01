@@ -1,16 +1,18 @@
 package com.shamstabrez16.productservice.model;
 
 
+import jakarta.persistence.*;
 import lombok.*;
-import javax.persistence.*;
 
-@Entity
-@Table(name = "Product")
+
+
 @Builder
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Table(name = "Product")
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)

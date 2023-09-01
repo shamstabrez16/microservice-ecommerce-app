@@ -8,9 +8,6 @@ import com.shamstabrez16.orderservice.model.Order;
 import com.shamstabrez16.orderservice.model.OrderLineItems;
 import com.shamstabrez16.orderservice.repository.OrderRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -33,7 +30,7 @@ public class OrderService {
         this.webClient = webClient;
     }
     @Transactional
-    public void  createOrder(@NotNull OrderRequest orderRequest) {
+    public void  createOrder( OrderRequest orderRequest) {
 
 
         System.out.println("createOrder");

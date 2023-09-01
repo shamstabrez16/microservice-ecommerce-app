@@ -5,20 +5,24 @@ import com.shamstabrez16.productservice.dto.ProductRequest;
 import com.shamstabrez16.productservice.dto.ProductResponse;
 import com.shamstabrez16.productservice.model.Product;
 import com.shamstabrez16.productservice.repository.ProductRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class ProductService {
 
 
     private final ProductRepository productRepository;
+
+    @Autowired
+    public ProductService(ProductRepository productRepository) {
+        this.productRepository = productRepository;
+    }
 
 
     public  void createProduct(ProductRequest productRequest){
