@@ -23,11 +23,11 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
 
-    private final WebClient webClient;
+    private final WebClient.Builder webClientBuilder;
     @Autowired
-    public OrderService(OrderRepository orderRepository,WebClient webClient) {
+    public OrderService(OrderRepository orderRepository,WebClient.Builder webClientBuilder) {
         this.orderRepository = orderRepository;
-        this.webClient = webClient;
+        this.webClientBuilder = webClientBuilder;
     }
     @Transactional
     public void  createOrder( OrderRequest orderRequest) {
@@ -48,8 +48,8 @@ public class OrderService {
                .map(OrderLineItems::getSkuCode)
                .toList();
        skuCodes.forEach(System.out::println);
-        InventoryResponse[] inventoryResponses= webClient.get()
-                .uri("http://localhost:8083/api/inventory",
+        InventoryResponse[] inventoryResponses= webClientBuilder.build().get()
+                .uri("http://inventoryservice/api/inventory",
                         uriBuilder -> uriBuilder.queryParam("skuCode",skuCodes).build())
                 .retrieve()
                 .bodyToMono(InventoryResponse[].class)
